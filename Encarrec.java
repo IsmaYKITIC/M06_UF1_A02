@@ -3,18 +3,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Encarrec implements Serializable {
-    private String id;
+    private int id;
     private String nom;
     private String telefon;
     private String dataEncarrec;
-    private ArrayList<Article> ArticlesL;
+    private ArrayList<Article> article;
     private double preuTotal;
 
-    public String getId() {
+    public Encarrec(int id, String nom, String telefon, String dataEncarrec, ArrayList<Article> article,
+            double preuTotal) {
+        this.id = id;
+        this.nom = nom;
+        this.telefon = telefon;
+        this.dataEncarrec = dataEncarrec;
+        this.article = article;
+        this.preuTotal = preuTotal;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -50,12 +60,12 @@ public class Encarrec implements Serializable {
         this.preuTotal = preuTotal;
     }
 
-    public List<Article> getArticlesL() {
-        return ArticlesL;
+    public ArrayList<Article> getArticle() {
+        return article;
     }
 
-    public void setArticlesL(ArrayList<Article> articlesL) {
-        ArticlesL = articlesL;
+    public void setArticle(ArrayList<Article> article) {
+        this.article = article;
     }
 
 }

@@ -1,14 +1,15 @@
 import java.io.*;
+
 import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.*;
 
 public class ControlEncarrecs {
-   private static String ruta = "/home/sma/ITIC/Segundo/M6/M06_UF1_A01-/Fitxers";
+   private final static String RUTA = "/home/sma/ITIC/Segundo/M6/M06_UF1_A02/Fitxers";
+   /* poner su ruta */
+   private static ArrayList<Encarrec> EncarrecComplet = new ArrayList<Encarrec>();
 
    public static void main(String[] args) throws IOException {
       while (true) {
-
+         boolean opcio = true;
          System.out.println("Quina operacio vols realitza:");
          System.out.println();
          System.out.println("-Generar un nou encàrrec(A)");
@@ -18,14 +19,14 @@ public class ControlEncarrecs {
          System.out.println("-Sortir (C)");
          System.out.println();
          char resposta = Utilitats.triaOpcio(Utilitats.readLine(), 1);
-         while (true) {
+         while (opcio) {
             if (resposta == 'A') {
-               generaEncarresc();
-               generaArticle();
-               break;
+               EncarrecComplet = generaEncarrecs();
+               EsculliFormat(EncarrecComplet);
+               opcio = false;
             } else if (resposta == 'B') {
                mostraEncarrec();
-               break;
+               opcio = false;
             } else {
                System.out.println("Fins aviat!");
                return;
@@ -36,22 +37,39 @@ public class ControlEncarrecs {
    }
 
    public static ArrayList<Encarrec> generaEncarrecs() {
-      ArrayList<Article> EncarrecL = new ArrayList<Article>();
+      ArrayList<Encarrec> EncarrecL = new ArrayList<Encarrec>();
+      int id = 0;
+      boolean ProducteMes = true;
+      while (ProducteMes) {
+         String nom = Utilitats.nom(1);
+         String telefon = Utilitats.telClient();
+         String data = Utilitats.dataClient();
+         ArrayList<Article> ArticlesA = generaArticles();
+         double preuTotal = 0;
+
+         for (Article article : ArticlesA) {
+            preuTotal += (article.getPreu() * article.getQuantitat());
+         }
+         id += 1;
+         EncarrecL.add(new Encarrec(id, nom, telefon, data, ArticlesA, preuTotal));
+         System.out.println("vols genera un altre encarrec? (s/n)");
+         ProducteMes = Utilitats.confirmador(Utilitats.readLine());
+
+      }
+      return EncarrecL;
+
    }
 
-   public static ArrayList<Article> generaArticle() {
+   public static ArrayList<Article> generaArticles() {
       ArrayList<Article> ArticlesL = new ArrayList<Article>();
       // Cliente
-      String nom = nom(1);
-      String telefon = telClient();
-      String data = dataClient();
 
       while (true) {
          // Article
-         String producte = nom(2);
-         double quantitat = quantitat();
-         String unitats = unitatsArticle();
-         double preu = preuArticle();
+         String producte = Utilitats.nom(2);
+         double quantitat = Utilitats.quantitat();
+         String unitats = Utilitats.unitatsArticle();
+         double preu = Utilitats.preuArticle();
          // instancia en lista
 
          ArticlesL.add(new Article(producte, quantitat, unitats, preu));
@@ -66,239 +84,37 @@ public class ControlEncarrecs {
 
    }
 
-   public static void EsculliFormat() {
+   public static void EsculliFormat(ArrayList<Encarrec> encarrec) {
 
       System.out.println();
       System.out.println("En quin format vols realitza l'encarrec:");
       System.out.println();
-      System.out.println("-Albarà(A)");
+      System.out.println("- Fitxer Serialitzable(A)");
       System.out.println();
-      System.out.println("-Binari (B)");
-      System.out.println();
-      System.out.println("-CSV (C)");
+      System.out.println("- Fitxer d’accés aleatori(B)");
       System.out.println();
 
-      char resposta = Utilitats.triaOpcio(Utilitats.readLine(), 1);
+      char resposta = Utilitats.triaOpcio(Utilitats.readLine(), 3);
       if (resposta == 'A') {
-         creaEncarrec(resposta, nom, telefon, data, ArticlesL);
+         creaEncarrec(resposta, encarrec);
          return;
       } else if (resposta == 'B') {
-         creaEncarrec(resposta, nom, telefon, data, ArticlesL);
-         return;
-      } else {
-         creaEncarrec(resposta, nom, telefon, data, ArticlesL);
+         creaEncarrec(resposta, encarrec);
          return;
       }
    }
 
-   public static String nom(int i) {
-      String text;
-      boolean esDigit = false;
-      if (i == 1) {
-         System.out.println("Introueix el teu Nom:");
-         text = Utilitats.readLine();
-         while (true) {
-            esDigit = false;
-            if (text.isBlank()) {
-               System.out.println("El camp és obligatori:");
-               text = Utilitats.readLine();
-            } else {
-               for (int j = 0; j < text.length(); j++) {
-                  if (Character.isDigit(text.charAt(j))) {
-                     esDigit = true;
-                     break;
-                  } else {
-                     esDigit = false;
-                  }
-               }
-               if (esDigit) {
-                  System.out.println("El nom no pot tenir Digits:");
-                  text = Utilitats.readLine();
-               } else {
-                  break;
-               }
-            }
-
-         }
-      } else {
-         System.out.println("Introueix el Nom del producte:");
-         text = Utilitats.readLine();
-         while (true) {
-            if (text.isBlank()) {
-               System.out.println("El camp és obligatori:");
-               text = Utilitats.readLine();
-            } else {
-               for (int j = 0; j < text.length(); j++) {
-                  if (Character.isDigit(text.charAt(j))) {
-                     esDigit = true;
-                     break;
-                  } else {
-                     esDigit = false;
-                  }
-               }
-               if (esDigit) {
-                  System.out.println("El nom del producte no pot tenir Digits:");
-                  text = Utilitats.readLine();
-               } else {
-                  break;
-               }
-            }
-
-         }
-      }
-      return text;
-   }
-
-   public static String telClient() {
-      String text;
-      String regex = "^[0-9]{9}$";
-      Pattern pattern = Pattern.compile(regex);
-
-      System.out.println("Introueix el teu numero sense prefix :");
-      text = Utilitats.readLine();
-
-      while (true) {
-         if (text.isBlank()) {
-            System.out.println("El camp és obligatori:");
-         } else {
-            Matcher matcher = pattern.matcher(text);
-            if (matcher.matches()) {
-               break;
-            } else {
-               System.out.println(
-                     "El Numero no pot tenir lletres ni caràcters especials i ha tenir 9 digits. Introdueix un número vàlid:");
-            }
-         }
-         text = Utilitats.readLine();
-      }
-      return text;
-   }
-
-   public static String dataClient() {
-      String text;
-
-      String regex = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/(\\d{4})$";
-      Pattern pattern = Pattern.compile(regex);
-
-      System.out.println("Introueix la Data actual (DD/MM/AAAA):");
-      text = Utilitats.readLine();
-
-      while (true) {
-         if (text.isBlank()) {
-            System.out.println("El camp és obligatori:");
-         } else {
-            Matcher matcher = pattern.matcher(text);
-            if (matcher.matches()) {
-               break;
-            } else {
-               System.out.println("Format de data incorrecte. Torna a introduir la data en format (DD/MM/AAAA):");
-            }
-         }
-         text = Utilitats.readLine();
-      }
-
-      return text;
-   }
-
-   public static String unitatsArticle() {
-      String text;
-      boolean esDigit = false;
-      System.out.println("Introdueix les unitats de l'article (ex. kg, unitats, litres, etc.):");
-      text = Utilitats.readLine();
-      while (true) {
-         if (text.isBlank()) {
-            System.out.println("El camp és obligatori:");
-            text = Utilitats.readLine();
-         } else {
-            for (int j = 0; j < text.length(); j++) {
-               if (Character.isDigit(text.charAt(j))) {
-                  esDigit = true;
-                  break;
-               } else {
-                  esDigit = false;
-               }
-            }
-            if (esDigit) {
-               System.out.println("Les unitats no poden ser Numeriques:");
-               text = Utilitats.readLine();
-            } else {
-               break;
-            }
-         }
-      }
-      return text.toUpperCase();
-   }
-
-   public static double quantitat() {
-      String text;
-      boolean esDigit = false;
-      System.out.println("Introdueix la quantitat :");
-      text = Utilitats.readLine();
-      while (true) {
-         if (text.isBlank()) {
-            System.out.println("El camp és obligatori:");
-            text = Utilitats.readLine();
-         } else {
-            for (int j = 0; j < text.length(); j++) {
-               if (Character.isLetter(text.charAt(j))) {
-                  esDigit = true;
-                  break;
-               } else {
-                  esDigit = false;
-               }
-            }
-            if (esDigit) {
-               System.out.println("La quantitat ha de ser numerica:");
-               text = Utilitats.readLine();
-            } else {
-               break;
-            }
-         }
-      }
-      return Double.parseDouble(text);
-   }
-
-   public static double preuArticle() {
-      String text;
-      boolean esDigit = false;
-      System.out.println("Introdueix El preu del Article :");
-      text = Utilitats.readLine();
-      while (true) {
-         if (text.isBlank()) {
-            System.out.println("El camp és obligatori:");
-            text = Utilitats.readLine();
-         } else {
-            for (int j = 0; j < text.length(); j++) {
-               if (Character.isLetter(text.charAt(j))) {
-                  esDigit = true;
-                  break;
-               } else {
-                  esDigit = false;
-               }
-            }
-            if (esDigit) {
-               System.out.println("La quantitat ha de ser numerica:");
-               text = Utilitats.readLine();
-            } else {
-               break;
-            }
-         }
-      }
-      return Double.parseDouble(text);
-   }
-
-   public static void creaEncarrec(char text, String nomCli, String telefon, String data, List<Article> ArticlesL) {
+   public static void creaEncarrec(char text, ArrayList<Encarrec> encarrec) {
       File tiket;
-
-      // Comprovem que la ruta existeix
-      File dir = new File(ruta);
-      if (!dir.exists()) {
-         dir.mkdirs();
-      }
-
       // Depenent del valor de 'text', assignem un nou fitxer a 'tiket'
+      // Serialitsable
       if (text == 'A') {
-         tiket = new File(ruta, "encarrecs_client_" + nomCli + "_" + System.currentTimeMillis() + ".txt");
+         File dir = new File(RUTA + "/Seria/");
+         if (!dir.exists()) {
+            dir.mkdirs();
+         }
+
+         tiket = new File(dir, "encarrecs_" + System.currentTimeMillis() + ".dat");
          if (!tiket.exists()) {
             try {
                tiket.createNewFile();
@@ -306,9 +122,15 @@ public class ControlEncarrecs {
                System.out.println("ERROR: No s'ha pogut crear l'arxiu. " + ex.getMessage());
             }
          }
-         escriuArrxiu(tiket, nomCli, telefon, data, ArticlesL, text);
+         escriuArrxiu(tiket, encarrec, text);
+
+         // d’accés aleatori
       } else if (text == 'B') {
-         tiket = new File(ruta, "encarrecs_client_" + nomCli + "_" + System.currentTimeMillis() + ".dat");
+         File dir2 = new File(RUTA + "/AccésAleatori");
+         if (!dir2.exists()) {
+            dir2.mkdirs();
+         }
+         tiket = new File(dir2, "encarrecs_" + System.currentTimeMillis() + ".dat");
          if (!tiket.exists()) {
             try {
                tiket.createNewFile();
@@ -316,108 +138,88 @@ public class ControlEncarrecs {
                System.out.println("ERROR: No s'ha pogut crear l'arxiu. " + ex.getMessage());
             }
          }
-         escriuArrxiu(tiket, nomCli, telefon, data, ArticlesL, text);
-      } else {
-         tiket = new File(ruta, "encarrecs_client_" + nomCli + "_" + System.currentTimeMillis() + ".csv");
-         if (!tiket.exists()) {
-            try {
-               tiket.createNewFile();
-            } catch (IOException ex) {
-               System.out.println("ERROR: No s'ha pogut crear l'arxiu. " + ex.getMessage());
-            }
-         }
-         escriuArrxiu(tiket, nomCli, telefon, data, ArticlesL, text);
+         escriuArrxiu(tiket, encarrec, text);
       }
    }
 
-   public static void escriuArrxiu(File tiket, String nomCli, String telefon, String data, List<Article> ArticlesL,
+   public static void escriuArrxiu(File tiket, ArrayList<Encarrec> encarrec,
          char tipus) {
-      // TXT
+      // serialitzable
       if (tipus == 'A') {
          try {
-            FileWriter escritptura = new FileWriter(tiket);
-
-            // Escribir cabeceras centradas
-            escritptura.write(String.format("Nom del client: %s\n", nomCli));
-            escritptura.write(String.format("Telefon del client: %s\n", telefon));
-            escritptura.write(String.format("Data de l'encarrec: %s\n", data));
-            escritptura.write("\n");
-
-            // Escribir tabla con formato de columnas
-            escritptura.write(String.format("%-10s %-10s %-15s\n", "Quantitat", " Unitats", " Article"));
-            escritptura.write(String.format("%-10s %-10s %-15s\n", "===========", "=========", "==============="));
-
-            // Escribir cada artículo en la tabla
-            for (Article article : ArticlesL) {
-               escritptura.write(String.format("%-10.1f\t %-5s \t\t %-15s\n",
-                     article.getQuantitat(),
-                     article.getUnitats(),
-                     article.getNom()));
-            }
-
-            escritptura.close();
-
-            System.out.println("Encarrec escrit correctament en el fitxer: " + tiket);
-            System.out.println();
-
-         } catch (IOException ex) {
+            escriuSerialitzat(tiket, encarrec);
+         } catch (Exception ex) {
             System.out.println("ERROR: No s'ha pogut escriure en l'arxiu.");
+            ex.getStackTrace();
          }
-         // CSV
-      } else if (tipus == 'C') {
+         // Acces aleatori
+      } else if (tipus == 'B') {
          try {
-            FileWriter escritptura = new FileWriter(tiket);
-            escritptura.write(nomCli + "," + telefon + "," + data + ",");
-            for (int i = 0; i < ArticlesL.size(); i++) {
-               escritptura.write(
-                     ArticlesL.get(i).getQuantitat() + "," + ArticlesL.get(i).getUnitats() + ","
-                           + ArticlesL.get(i).getNom() + ",");
-            }
-            escritptura.close();
-            System.out.println("Encarrec escrit correctament en el fitxer: " + tiket);
-            System.out.println();
+            escriuAleatori(tiket, encarrec);
+
          } catch (Exception e) {
             System.out.println("ERROR: No s'ha pogut escriure en l'arxiu.");
          }
-         // bin
-      } else {
-         try {
-            DataOutputStream dos = new DataOutputStream(new FileOutputStream(tiket, true));
-            dos.writeUTF(nomCli);
-            dos.writeUTF(telefon);
-            dos.writeUTF(data);
-            for (int i = 0; i < ArticlesL.size(); i++) {
-               dos.writeDouble(ArticlesL.get(i).getQuantitat());
-               dos.writeUTF(ArticlesL.get(i).getUnitats() + " "
-                     + ArticlesL.get(i).getNom());
-            }
-            dos.close();
-            System.out.println("Encarrec escrit correctament en el fitxer: " + tiket);
-            System.out.println();
-
-         } catch (IOException ex) {
-            System.out.println("ERROR: No s'ha pogut escriure en l'arxiu.");
-         }
       }
+      System.out.println("Encarrec escrit correctament en el fitxer: " + tiket);
+      System.out.println();
+   }
 
+   public static void escriuSerialitzat(File ruta, ArrayList<Encarrec> encarrecs) {
+      try {
+         FileOutputStream fitxerseria = new FileOutputStream(ruta);
+         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fitxerseria);
+         objectOutputStream.writeObject(encarrecs);
+         objectOutputStream.close();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+
+   public static void escriuAleatori(File ruta, ArrayList<Encarrec> encarrecs) {
+      try (RandomAccessFile raf = new RandomAccessFile(ruta, "rw")) {
+         for (Encarrec e : encarrecs) {
+            raf.writeInt(e.getId());
+            raf.writeUTF(e.getNom());
+            raf.writeUTF(e.getTelefon());
+            raf.writeUTF(e.getDataEncarrec());
+
+            ArrayList<Article> articles = e.getArticle();
+            for (Article art : articles) {
+               raf.writeUTF(art.getNom());
+               raf.writeDouble(art.getPreu());
+            }
+            raf.writeDouble(e.getPreuTotal());
+         }
+      } catch (
+
+      Exception e) {
+         // TODO: handle exception
+      }
    }
 
    public static void mostraEncarrec() throws IOException {
       while (true) {
          System.out.println("Quin tipus de fitxer vols mostra:");
          System.out.println();
-         System.out.println("-Binari (B)");
+         System.out.println("- Fitxer Serialitzable(A)");
          System.out.println();
-         System.out.println("-CSV (C)");
-         System.out.println();
+
          boolean comfirmacio;
-         char resposta = Utilitats.triaOpcio(Utilitats.readLine(), 2);
+         char resposta = Utilitats.triaOpcio(Utilitats.readLine(), 3);
          try {
-            if (resposta == 'B') {
-               llegeixBin();
-            } else {
-               llegeixCSV();
+            while (true) {
+               if (resposta == 'B') {
+                  System.out.println("Opcio no disponible temporalment");
+                  System.out.println();
+               } else if (resposta == 'A') {
+                  llegeixSerialitzat();
+                  break;
+               }
+               System.out.println("Tria un altre opcio:");
+               resposta = Utilitats.triaOpcio(Utilitats.readLine(), 3);
             }
+            System.out.println();
             System.out.println("Vols llegir un Altre fitxer?");
             comfirmacio = Utilitats.confirmador(Utilitats.readLine());
             if (!comfirmacio) {
@@ -431,33 +233,25 @@ public class ControlEncarrecs {
       }
    }
 
-   public static void llegeixBin() throws IOException {
-      System.out.println("Introueix la ruta del fitche(phat):");
+   @SuppressWarnings("unchecked")
+   public static void llegeixSerialitzat() throws IOException {
+      System.out.println("Introueix la RUTA del fitche(phat):");
       String dir = Utilitats.readLine() + ".dat";
+      System.out.println();
 
-      FileReader lector = new FileReader(dir);
-      BufferedReader input = new BufferedReader(lector);
-      while (true) {
-         String linia = input.readLine();
-         if (null == linia)
-            break;
-         System.out.println(linia);
+      try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir))) {
+         ArrayList<Encarrec> encarrecs = (ArrayList<Encarrec>) in.readObject();
+         if (encarrecs.isEmpty()) {
+            System.out.println("No s'han trobat encàrrecs a l'arxiu.");
+         } else {
+            System.out.println("Encàrrecs:");
+            for (Encarrec enc : encarrecs) {
+               System.out.println(enc.toString());
+            }
+         }
+      } catch (IOException | ClassNotFoundException e) {
+         System.err.println("Error al llegir els encàrrecs: " + e.getMessage());
       }
-      input.close();
    }
 
-   public static void llegeixCSV() throws IOException {
-      System.out.println("Introueix la ruta del fitche(phat):");
-      String dir = Utilitats.readLine() + ".csv";
-
-      FileReader lector = new FileReader(dir);
-      BufferedReader input = new BufferedReader(lector);
-      while (true) {
-         String linia = input.readLine();
-         if (null == linia)
-            break;
-         System.out.println(linia);
-      }
-      input.close();
-   }
 }
