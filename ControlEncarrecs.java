@@ -3,7 +3,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class ControlEncarrecs {
-   private final static String RUTA = "/home/sma/ITIC/Segundo/M6/M06_UF1_A02/Fitxers";
+   private final static String RUTA = System.getProperty("user.home") + "/Desktop/M06_UF1_A02/FitxersIsma";
    /* poner su ruta */
    private static ArrayList<Encarrec> EncarrecComplet = new ArrayList<Encarrec>();
 
